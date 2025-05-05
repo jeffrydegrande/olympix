@@ -1,3 +1,11 @@
+# TL;DR
+
+> This tool approaches analyzing Cairo smart contracts from two main ideas:
+>
+> 1. Uses tree-sitter to parse Cairo code and tree-sitter queries to find patterns.
+> 2. Uses vector embeddings to adapt tree-sitter queries to the contract being analyzed
+>    by replacing hardcoded identifiers with their semantic equivalents.
+
 # 🧪 Solidair – Cairo Static Analysis for Protocol Vulnerabilities
 
 A lightweight static analysis tool designed to detect patterns that led to the [zkLend hack](https://blocksec.com/blog/zklend-exploit-post-mortem) using Tree-sitter and Go.
