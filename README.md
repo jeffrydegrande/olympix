@@ -114,6 +114,8 @@ Code: Storage
 - Fast (Tree-sitter is built for real-time parsing).
 - Single binary, no deps (thanks to Go's embed).
 - Easy to extend – just add .scm queries.
+- We can add parsers for other languages (e.g. Solidity). This might need its own
+  set of queries but otherwise wouldn't change the architecture of the tool.
 - Better than regex, lighter than full semantic analysis.
 
 ❌ Cons
