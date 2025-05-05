@@ -150,14 +150,19 @@ func extractQueryPattern(queryContent string) string {
 }
 
 func main() {
-
-	if len(os.Args) < 1 {
-		fmt.Fprintf(os.Stderr, "Usage: %s filename\n", os.Args[0])
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Usage: %s filename [--extract-vars]\n", os.Args[0])
 		os.Exit(1)
 	}
 
 	filename := os.Args[1]
 	queryDir := "queries" // Default query directory
+	
+	// Check for --extract-vars flag
+	extractVars := false
+	if len(os.Args) > 2 && os.Args[2] == "--extract-vars" {
+		extractVars = true
+	}
 
 	// Read the source code
 	data, err := os.ReadFile(filename)
@@ -173,9 +178,23 @@ func main() {
 	err = parser.SetLanguage(tree_sitter.NewLanguage(unsafe.Pointer(cairo.Language())))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error setting language: %v\n", err)
+		os.Exit(1)
 	}
 	tree := parser.Parse(data, nil)
 	defer tree.Close()
+
+	// If --extract-vars flag is provided, extract and print variables
+	if extractVars {
+		vars, err := ExtractVariables(data, tree)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error extracting variables: %v\n", err)
+			os.Exit(1)
+		}
+		
+		vars.Filename = filename
+		PrintExtractedVariables(vars)
+		return
+	}
 
 	// Read all query files
 	queries, err := ReadQueryFiles(queryDir)
