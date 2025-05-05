@@ -146,3 +146,12 @@ So we need to implement a couple of features:
   and and use cosine similarity to match them.
 - We need to add support for templating our queries so that we can
   pass values to them. The standard Go `text/template` package should be enough.
+
+## Building, testing and running the project
+
+A makefile is provided to help building and testing the project.
+
+Just `make` in the root directory will build the project. Run `make test` to
+run the tests and run `make ci` to run tests and linters.
+
+To run the project, after building, run `./solidair --help` to see the available commands.
