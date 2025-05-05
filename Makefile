@@ -7,9 +7,7 @@ BUILD_DATE := $(shell date -u '+%Y%m%dT%H%M%S')
 LDFLAGS := -ldflags="-s -w -X $(MODULE_PKG)/build.BuildDate=${BUILD_DATE} -X ${MODULE_PKG}/build.Commit=${GIT_HASH}"
 
 BIN_DIR ?= $(shell pwd)/bin
-BIN_NAME ?= nethgate
-
-TAILWIND := $(shell command -v tailwindcss)
+BIN_NAME ?= solidair
 
 .PHONY: default
 default: build
@@ -20,11 +18,11 @@ help: ## Display this help.
 
 .PHONY: docker
 docker: ## Build docker image
-	@ echo "▶️ Building nethgate docker image for development."
+	@ echo "▶️ Building solidair docker image for development."
 	@ docker buildx build \
 		--build-arg GITHUB_SHA=${GITHUB_SHA} \
-		--target nethgate-runtime \
-		-t nethermindeth/nethgate .
+		--target solidair-runtime \
+		-t jeffrydegrande/solidair .
 	@ echo ✅ success!
 
 ci: clean build lint vet staticcheck test
@@ -35,7 +33,7 @@ ci-full: ci security
 
 clean:
 	@rm -fr coverage.html coverage.txt
-	@rm -fr nethgate
+	@rm -fr $(BIN_NAME)
 .PHONY: clean
 
 .PHONY: security
@@ -88,7 +86,7 @@ bench: ## Run benchmarks
 generated:
 	go generate -v ./...
 
-build: docs generated tailwind-build
+build: docs generated
 	go build $(LDFLAGS) -o $(BIN_NAME)
 .PHONY: build
 
