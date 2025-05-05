@@ -142,6 +142,7 @@ So we need to implement a couple of features:
 
 - We need to extract variables from a smart contract. We can
   do this with tree-sitter queries.
-- We need embeddings. We can use OpenAI's API for this.
+- We need embeddings. We can use OpenAI's API for this. We don't need a vector database to store these. We'll keep them in a TOML file which we'll read at startup
+  and and use cosine similarity to match them.
 - We need to add support for templating our queries so that we can
   pass values to them. The standard Go `text/template` package should be enough.
