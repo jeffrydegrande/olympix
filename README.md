@@ -9,6 +9,7 @@ A lightweight static analysis tool designed to detect patterns that led to the [
 - I’m not trained as a security researcher, auditor or a Cairo expert.
 - I'll try and approach things from first principles, document my reasoning and have fun.
 - I'm not bouncing off any feedback, so a lot of ideas will likely be obvious, short-sighted, and may not survive much scrutiny. It is what it is :)
+- Since this is a design excercise and not a programming exercise I leaned into AI generation to help me build.
 
 ---
 
@@ -47,7 +48,7 @@ I see **three** main components that contributed to the hack:
 
 ---
 
-## 🧰 Tooling Approach
+## 🧰 Version 1
 
 I don't want to build a full Cairo parser. I'll use tree-sitter instead.
 
@@ -112,3 +113,24 @@ Code: Storage
 - Not semantic – it’s purely syntax-based. E.g. no types or scopes.
 - Hardcoded identifiers – is_active, marketActive, etc.
 - No rule composition – can’t AND/OR queries programmatically.
+
+# 🧪 Version 2
+
+In this version I want to tackle the problem with identifiers being hardcode.
+
+The problem here is that we can't know up front how a smart contract writer will
+name their variables.
+
+We can do this by:
+
+1. Extracting the variables used in the smart contract with a tree-sitter query.
+2. We're going to calculate vector embeddings for those variable names.
+3. We'll match those embeddings against our own embeddings.
+4. We'll pass those matches as parameters to our queries.
+
+So we have to do a few things:
+
+- We need to build the functionality to extract variable names.
+- We need functionality to calculate embeddings.
+- We need to add support for treating our queries as templates so that we can
+  pass values to them.

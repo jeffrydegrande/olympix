@@ -18,16 +18,19 @@ We'll consider several approaches for generating embeddings:
 ### 1. Local Embedding Models
 
 **Pros:**
+
 - No external API calls or dependencies
 - Faster execution
 - Works offline
 
 **Cons:**
+
 - Potentially lower quality embeddings
 - May require larger binary size
 - Limited context understanding
 
 **Options:**
+
 - Sentence Transformers (Go bindings for BERT-like models)
 - Word2Vec or GloVe pre-trained embeddings
 - FastText with pre-trained vectors
@@ -35,15 +38,18 @@ We'll consider several approaches for generating embeddings:
 ### 2. Simple Word Similarity Approaches
 
 **Pros:**
+
 - Fast and lightweight
 - No dependencies
 - Easy to implement
 
 **Cons:**
+
 - Less semantic understanding
 - Limited to basic similarity detection
 
 **Options:**
+
 - Word tokenization and overlap scoring
 - Edit distance with semantic components
 - n-gram similarity with weighting
@@ -51,16 +57,19 @@ We'll consider several approaches for generating embeddings:
 ### 3. External API Integration
 
 **Pros:**
+
 - High-quality embeddings with deep semantic understanding
 - Maintained and updated by providers
 - More accurate for specialized domains
 
 **Cons:**
+
 - Requires API keys and internet connection
 - Network latency
 - Usage costs
 
 **Options:**
+
 - OpenAI Text Embeddings API
 - Hugging Face Inference API
 - Custom API endpoint
@@ -72,6 +81,7 @@ For simplicity, performance, and to avoid external dependencies, we recommend a 
 **Hybrid Word-Semantic Similarity with Caching**
 
 This approach combines multiple techniques:
+
 1. Word segmentation (camelCase, snake_case, etc.)
 2. Stemming or lemmatization of words
 3. Synonym matching via a built-in dictionary
@@ -175,14 +185,14 @@ var SecurityConcepts = map[string]struct {
 // GenerateEmbeddings creates embeddings for a set of extracted variables
 func GenerateEmbeddings(variables []VariableInfo, cache *EmbeddingCache) []Embedding {
     var embeddings []Embedding
-    
+
     for _, v := range variables {
         // Check cache first
         if embed, found := cache.Variables[v.Name]; found {
             embeddings = append(embeddings, embed)
             continue
         }
-        
+
         // Create new embedding
         embed := Embedding{
             Original: v.Name,
@@ -190,16 +200,16 @@ func GenerateEmbeddings(variables []VariableInfo, cache *EmbeddingCache) []Embed
             Type:     v.Type,
             Context:  v.Context,
         }
-        
+
         // Stem the segments
         for _, seg := range embed.Segments {
             embed.Stems = append(embed.Stems, StemWord(seg))
         }
-        
+
         embeddings = append(embeddings, embed)
         cache.Variables[v.Name] = embed
     }
-    
+
     return embeddings
 }
 ```
@@ -208,13 +218,13 @@ func GenerateEmbeddings(variables []VariableInfo, cache *EmbeddingCache) []Embed
 
 ```go
 // MatchVariablesToConcepts finds variables that match security concepts
-func MatchVariablesToConcepts(variables []VariableInfo, 
+func MatchVariablesToConcepts(variables []VariableInfo,
                              cache *EmbeddingCache) []ConceptMatch {
     var matches []ConceptMatch
-    
+
     // Generate embeddings for variables
     varEmbeddings := GenerateEmbeddings(variables, cache)
-    
+
     // Generate embeddings for concepts (if not cached)
     for concept := range SecurityConcepts {
         if _, found := cache.Concepts[concept]; !found {
@@ -228,7 +238,7 @@ func MatchVariablesToConcepts(variables []VariableInfo,
             cache.Concepts[concept] = embed
         }
     }
-    
+
     // Compare each variable against each concept
     for i, varEmbed := range varEmbeddings {
         for concept, conceptEmbed := range cache.Concepts {
@@ -236,7 +246,7 @@ func MatchVariablesToConcepts(variables []VariableInfo,
             cacheKey := varEmbed.Original + ":" + conceptEmbed.Original
             var score float64
             var reason string
-            
+
             if scoreMap, found := cache.Scores[varEmbed.Original]; found {
                 if cachedScore, ok := scoreMap[concept]; ok {
                     score = cachedScore
@@ -244,14 +254,14 @@ func MatchVariablesToConcepts(variables []VariableInfo,
                 }
             } else {
                 score, reason = CalculateSimilarity(varEmbed, conceptEmbed)
-                
+
                 // Update cache
                 if _, exists := cache.Scores[varEmbed.Original]; !exists {
                     cache.Scores[varEmbed.Original] = make(map[string]float64)
                 }
                 cache.Scores[varEmbed.Original][concept] = score
             }
-            
+
             // If score is above threshold, add to matches
             if score >= 0.7 {  // Configurable threshold
                 matches = append(matches, ConceptMatch{
@@ -263,12 +273,12 @@ func MatchVariablesToConcepts(variables []VariableInfo,
             }
         }
     }
-    
+
     // Sort matches by similarity score (highest first)
     sort.Slice(matches, func(i, j int) bool {
         return matches[i].SimilarityScore > matches[j].SimilarityScore
     })
-    
+
     return matches
 }
 ```
@@ -299,6 +309,8 @@ The embedding system will be integrated as follows:
 ## Next Steps
 
 After implementing the embedding system:
+
 1. Integrate with the variable extraction component
 2. Connect to the parameterized query system
 3. Fine-tune thresholds and scoring based on evaluation results
+

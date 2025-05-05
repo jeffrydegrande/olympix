@@ -1,0 +1,47 @@
+[[concepts]]
+name = "active"
+description = "Concept representing whether a market is active/initialized"
+synonyms = ["enabled", "live", "activated", "initialized", "ready"]
+embedding.vector = [0.01, 0.02, 0.03]  # Placeholder - would be replaced with actual embedding vectors
+
+[[concepts]]
+name = "locked"
+description = "Concept representing a reentrancy guard or mutex"
+synonyms = ["reentrancy_guard", "mutex", "guard", "semaphore"]
+embedding.vector = [0.04, 0.05, 0.06]  # Placeholder
+
+[[concepts]]
+name = "grace_period"
+description = "Concept representing a waiting period or timelock"
+synonyms = ["timelock", "delay", "cooldown", "waiting_period"]
+embedding.vector = [0.07, 0.08, 0.09]  # Placeholder
+
+[[concepts]]
+name = "admin"
+description = "Concept representing an administrative role or owner"
+synonyms = ["owner", "administrator", "authority", "governor"]
+embedding.vector = [0.10, 0.11, 0.12]  # Placeholder
+
+[[concepts]]
+name = "min_deposit"
+description = "Concept representing a minimum deposit or liquidity threshold"
+synonyms = ["minimum_deposit", "min_liquidity", "threshold", "minimum_amount"]
+embedding.vector = [0.13, 0.14, 0.15]  # Placeholder
+
+[[concepts]]
+name = "bounds_check"
+description = "Concept representing bounds checking or validations"
+synonyms = ["validation", "assert", "check", "limit", "cap"]
+embedding.vector = [0.16, 0.17, 0.18]  # Placeholder
+
+[[concepts]]
+name = "accumulator"
+description = "Concept representing an accumulator or counter"
+synonyms = ["counter", "index", "tally", "tracker"]
+embedding.vector = [0.19, 0.20, 0.21]  # Placeholder
+
+[[concepts]]
+name = "donation_cap"
+description = "Concept representing a cap on donations or contributions"
+synonyms = ["cap", "limit", "maximum", "ceiling"]
+embedding.vector = [0.22, 0.23, 0.24]  # Placeholder
