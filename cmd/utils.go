@@ -13,23 +13,6 @@ import (
 	tree_sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
-// Import types from main package
-// VariableInfo represents information about an extracted variable
-type VariableInfo struct {
-	Name       string   // Variable name
-	Type       string   // Variable type (if available)
-	Context    string   // Storage, parameter, etc.
-	ParentName string   // Name of the parent struct/function
-	LineNumber uint32   // Line number in source code
-	Comments   []string // Associated comments
-}
-
-// ExtractedVariables holds all variables extracted from a source file
-type ExtractedVariables struct {
-	Filename  string         // Source filename
-	Variables []VariableInfo // All extracted variables
-}
-
 // QueryResult represents a finding from running a query against the code
 type QueryResult struct {
 	QueryName   string
@@ -164,4 +147,3 @@ func extractQueryPattern(queryContent string) string {
 
 	return strings.Join(queryLines, "\n")
 }
-

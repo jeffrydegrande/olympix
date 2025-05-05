@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unsafe"
 
 	"github.com/jeffrydegrande/solidair/cairo"
+	"github.com/jeffrydegrande/solidair/pkg/concepts"
+	"github.com/jeffrydegrande/solidair/pkg/embedding"
+	"github.com/jeffrydegrande/solidair/pkg/variables"
 	"github.com/spf13/cobra"
-	tree_sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
 var matchCmd = &cobra.Command{
 	Use:   "match [file]",
 	Short: "Match variables in a Cairo file to security concepts",
-	Args:  cobra.ExactArgs(1),
-	Run:   matchMain,
+	Long: `Analyze a Cairo file to extract variables and match them against security concepts.
+This helps identify variables that may be related to security-sensitive operations.`,
+	Args: cobra.ExactArgs(1),
+	Run:  matchMain,
 }
 
 func init() {
@@ -29,7 +32,7 @@ func matchMain(cmd *cobra.Command, args []string) {
 	offline, _ := cmd.Flags().GetBool("offline")
 
 	// Load security concepts
-	concepts, err := LoadSecurityConcepts()
+	securityConcepts, err := concepts.LoadSecurityConcepts()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading security concepts: %v\n", err)
 		os.Exit(1)
@@ -43,40 +46,35 @@ func matchMain(cmd *cobra.Command, args []string) {
 	}
 
 	// Parse the source code
-	parser := tree_sitter.NewParser()
-	defer parser.Close()
-
-	err = parser.SetLanguage(tree_sitter.NewLanguage(unsafe.Pointer(cairo.Language())))
+	tree, err := cairo.Parse(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error setting language: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error parsing file: %v\n", err)
 		os.Exit(1)
 	}
-	tree := parser.Parse(data, nil)
-	defer tree.Close()
 
 	// Extract variables
-	vars, err := ExtractVariables(data, tree)
+	vars, err := variables.ExtractVariables(data, tree)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error extracting variables: %v\n", err)
 		os.Exit(1)
 	}
 
 	// Set up embedding matcher
-	var matcher *EmbeddingMatcher
+	var matcher *embedding.EmbeddingMatcher
 	if offline {
 		// Offline mode
-		matcher = NewEmbeddingMatcher(nil, concepts, true)
+		matcher = embedding.NewEmbeddingMatcher(nil, securityConcepts, true)
 	} else {
 		// Online mode with OpenAI API
 		if apiKey == "" {
-			apiKey = os.Getenv("OPENAI_API_KEY")
+			apiKey = embedding.GetAPIKey()
 			if apiKey == "" {
 				fmt.Fprintln(os.Stderr, "OpenAI API key not provided. Use --api-key flag or set OPENAI_API_KEY environment variable, or use --offline mode")
 				os.Exit(1)
 			}
 		}
-		openAIClient := NewOpenAIClient(apiKey)
-		matcher = NewEmbeddingMatcher(openAIClient, concepts, false)
+		openAIClient := embedding.NewOpenAIClient(apiKey)
+		matcher = embedding.NewEmbeddingMatcher(openAIClient, securityConcepts, false)
 	}
 
 	// Match variables to concepts

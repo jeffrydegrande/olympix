@@ -1,8 +1,17 @@
-package cmd
+package concepts
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/pelletier/go-toml/v2"
+)
 
 // DefaultSecurityConcepts returns the default security concepts without embeddings
-func DefaultSecurityConcepts() []SecurityConcept {
-	return []SecurityConcept{
+func DefaultSecurityConcepts() []types.SecurityConcept {
+	return []types.SecurityConcept{
 		{
 			Name:        "active",
 			Description: "Concept representing whether a market is active/initialized",
@@ -46,3 +55,41 @@ func DefaultSecurityConcepts() []SecurityConcept {
 	}
 }
 
+// SaveConceptsFile saves concept definitions without embeddings
+func SaveConceptsFile(concepts []types.SecurityConcept, outputDir string) error {
+	// Ensure directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("error creating directory: %w", err)
+	}
+
+	// Make a copy without embeddings
+	conceptsCopy := make([]types.SecurityConcept, len(concepts))
+	for i, concept := range concepts {
+		conceptsCopy[i] = types.SecurityConcept{
+			Name:        concept.Name,
+			Description: concept.Description,
+			Synonyms:    concept.Synonyms,
+		}
+	}
+
+	// Save to concepts file
+	conceptsFile := filepath.Join(outputDir, "concepts.toml")
+	file, err := os.Create(conceptsFile)
+	if err != nil {
+		return fmt.Errorf("error creating concepts file: %w", err)
+	}
+	defer file.Close()
+
+	config := struct {
+		Concepts []types.SecurityConcept `toml:"concepts"`
+	}{
+		Concepts: conceptsCopy,
+	}
+
+	encoder := toml.NewEncoder(file)
+	if err := encoder.Encode(config); err != nil {
+		return fmt.Errorf("error encoding concepts TOML: %w", err)
+	}
+
+	return nil
+}

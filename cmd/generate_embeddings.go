@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/jeffrydegrande/solidair/pkg/concepts"
+	"github.com/jeffrydegrande/solidair/pkg/embedding"
+	"github.com/jeffrydegrande/solidair/pkg/types"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 )
@@ -14,12 +16,6 @@ import (
 var (
 	outputDir string
 )
-
-// embeddingEntry stores an embedding with its concept name for easier mapping
-type embeddingEntry struct {
-	ConceptName string    `toml:"concept_name"`
-	Embedding   Embedding `toml:"embedding"`
-}
 
 var generateEmbeddingsCmd = &cobra.Command{
 	Use:   "generate-embeddings",
@@ -38,80 +34,11 @@ func init() {
 	rootCmd.AddCommand(generateEmbeddingsCmd)
 }
 
-// saveConceptsFile saves concept definitions without embeddings
-func saveConceptsFile(concepts []SecurityConcept, outputDir string) error {
-	// Ensure directory exists
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("error creating directory: %w", err)
-	}
-
-	// Make a copy without embeddings
-	conceptsCopy := make([]SecurityConcept, len(concepts))
-	for i, concept := range concepts {
-		conceptsCopy[i] = SecurityConcept{
-			Name:        concept.Name,
-			Description: concept.Description,
-			Synonyms:    concept.Synonyms,
-		}
-	}
-
-	// Save to concepts file
-	conceptsFile := filepath.Join(outputDir, "concepts.toml")
-	file, err := os.Create(conceptsFile)
-	if err != nil {
-		return fmt.Errorf("error creating concepts file: %w", err)
-	}
-	defer file.Close()
-
-	config := struct {
-		Concepts []SecurityConcept `toml:"concepts"`
-	}{
-		Concepts: conceptsCopy,
-	}
-
-	encoder := toml.NewEncoder(file)
-	if err := encoder.Encode(config); err != nil {
-		return fmt.Errorf("error encoding concepts TOML: %w", err)
-	}
-
-	return nil
-}
-
-// saveEmbeddingsFile saves all embeddings to a single file
-func saveEmbeddingsFile(embeddings []embeddingEntry, outputDir string) error {
-	// Ensure directory exists
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("error creating directory: %w", err)
-	}
-
-	// Create embeddings file
-	embeddingsFile := filepath.Join(outputDir, "embeddings.toml")
-	file, err := os.Create(embeddingsFile)
-	if err != nil {
-		return fmt.Errorf("error creating embeddings file: %w", err)
-	}
-	defer file.Close()
-
-	// Write the embeddings
-	config := struct {
-		Embeddings []embeddingEntry `toml:"embeddings"`
-	}{
-		Embeddings: embeddings,
-	}
-
-	encoder := toml.NewEncoder(file)
-	if err := encoder.Encode(config); err != nil {
-		return fmt.Errorf("error encoding embeddings TOML: %w", err)
-	}
-
-	return nil
-}
-
 func generateEmbeddingsMain(cmd *cobra.Command, args []string) {
 	// Get API key from flag or environment variable
 	apiKey, _ := cmd.Flags().GetString("api-key")
 	if apiKey == "" {
-		apiKey = os.Getenv("OPENAI_API_KEY")
+		apiKey = embedding.GetAPIKey()
 		if apiKey == "" {
 			fmt.Fprintln(os.Stderr, "OpenAI API key not provided. Use --api-key flag or set OPENAI_API_KEY environment variable")
 			os.Exit(1)
@@ -119,22 +46,22 @@ func generateEmbeddingsMain(cmd *cobra.Command, args []string) {
 	}
 
 	// Get the default security concepts
-	concepts := DefaultSecurityConcepts()
+	securityConcepts := concepts.DefaultSecurityConcepts()
 
 	// Initialize OpenAI client
 	client := openai.NewClient(apiKey)
 	ctx := context.Background()
 
 	// Create the concept metadata file first (without embeddings)
-	err := saveConceptsFile(concepts, outputDir)
+	err := concepts.SaveConceptsFile(securityConcepts, outputDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error saving concepts file: %v\n", err)
 		os.Exit(1)
 	}
 
 	// Collect embeddings for all concepts
-	var embeddingEntries []embeddingEntry
-	for _, concept := range concepts {
+	var embeddingEntries []types.EmbeddingEntry
+	for _, concept := range securityConcepts {
 		fmt.Printf("Generating embedding for concept '%s'...\n", concept.Name)
 
 		// Get embedding
@@ -162,14 +89,14 @@ func generateEmbeddingsMain(cmd *cobra.Command, args []string) {
 		}
 
 		// Add to embedding entries
-		embeddingEntries = append(embeddingEntries, embeddingEntry{
+		embeddingEntries = append(embeddingEntries, types.EmbeddingEntry{
 			ConceptName: concept.Name,
-			Embedding:   Embedding{Vector: vector},
+			Embedding:   types.Embedding{Vector: vector},
 		})
 	}
 
 	// Save all embeddings to a single file
-	err = saveEmbeddingsFile(embeddingEntries, outputDir)
+	err = embedding.SaveEmbeddingsFile(embeddingEntries, outputDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error saving embeddings file: %v\n", err)
 		os.Exit(1)

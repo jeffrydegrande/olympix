@@ -3,11 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"unsafe"
 
 	"github.com/jeffrydegrande/solidair/cairo"
 	"github.com/spf13/cobra"
-	tree_sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
 var analyzeCmd = &cobra.Command{
@@ -33,15 +31,11 @@ func analyzeMain(cmd *cobra.Command, args []string) {
 	}
 
 	// Parse the source code
-	parser := tree_sitter.NewParser()
-	defer parser.Close()
-
-	err = parser.SetLanguage(tree_sitter.NewLanguage(unsafe.Pointer(cairo.Language())))
+	tree, err := cairo.Parse(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error setting language: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error parsing file: %v\n", err)
 		os.Exit(1)
 	}
-	tree := parser.Parse(data, nil)
 	defer tree.Close()
 
 	// Read all query files
