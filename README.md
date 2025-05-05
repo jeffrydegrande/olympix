@@ -126,7 +126,7 @@ Code: Storage
 
 # 🧪 Version 2
 
-In this version I want to tackle the problem with identifiers being hardcode.
+In this version I want to tackle the problem with identifiers being hardcoded.
 
 The problem here is that we can't know up front how a smart contract writer will
 name their variables.
@@ -134,13 +134,14 @@ name their variables.
 We can do this by:
 
 1. Extracting the variables used in the smart contract with a tree-sitter query.
-2. We're going to calculate vector embeddings for those variable names.
+2. We'll compute vector embeddings for those variable names.
 3. We'll match those embeddings against our own embeddings.
-4. We'll pass those matches as parameters to our queries.
+4. We'll pass those matched identifiers as parameters to our queries.
 
-So we have to do a few things:
+So we need to implement a couple of features:
 
-- We need to build the functionality to extract variable names.
-- We need functionality to calculate embeddings.
-- We need to add support for treating our queries as templates so that we can
-  pass values to them.
+- We need to extract variables from a smart contract. We can
+  do this with tree-sitter queries.
+- We need embeddings. We can use OpenAI's API for this.
+- We need to add support for templating our queries so that we can
+  pass values to them. The standard Go `text/template` package should be enough.
