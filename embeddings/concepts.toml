@@ -1,0 +1,63 @@
+[[concepts]]
+name = 'active'
+description = 'Concept representing whether a market is active/initialized'
+synonyms = ['enabled', 'live', 'activated', 'initialized', 'ready']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'locked'
+description = 'Concept representing a reentrancy guard or mutex'
+synonyms = ['reentrancy_guard', 'mutex', 'guard', 'semaphore']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'grace_period'
+description = 'Concept representing a waiting period or timelock'
+synonyms = ['timelock', 'delay', 'cooldown', 'waiting_period']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'admin'
+description = 'Concept representing an administrative role or owner'
+synonyms = ['owner', 'administrator', 'authority', 'governor']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'min_deposit'
+description = 'Concept representing a minimum deposit or liquidity threshold'
+synonyms = ['minimum_deposit', 'min_liquidity', 'threshold', 'minimum_amount']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'bounds_check'
+description = 'Concept representing bounds checking or validations'
+synonyms = ['validation', 'assert', 'check', 'limit', 'cap']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'accumulator'
+description = 'Concept representing an accumulator or counter'
+synonyms = ['counter', 'index', 'tally', 'tracker']
+
+[concepts.embedding]
+vector = []
+
+[[concepts]]
+name = 'donation_cap'
+description = 'Concept representing a cap on donations or contributions'
+synonyms = ['cap', 'limit', 'maximum', 'ceiling']
+
+[concepts.embedding]
+vector = []
