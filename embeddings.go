@@ -12,7 +12,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-//go:embed embeddings/security_concepts.toml
+//go:embed embeddings/concepts.toml
 var embeddingsFS embed.FS
 
 // Embedding represents a vector embedding for a variable or concept
@@ -229,7 +229,7 @@ func (m *EmbeddingMatcher) MatchVariables(ctx context.Context, variables []Varia
 // LoadSecurityConcepts loads the pre-computed security concept embeddings
 func LoadSecurityConcepts() ([]SecurityConcept, error) {
 	// Read the embedded TOML file
-	conceptsData, err := embeddingsFS.ReadFile("embeddings/security_concepts.toml")
+	conceptsData, err := embeddingsFS.ReadFile("embeddings/concepts.toml")
 	if err != nil {
 		return nil, fmt.Errorf("error reading security concepts TOML: %w", err)
 	}
