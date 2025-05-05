@@ -29,3 +29,4 @@ func init() {
 	rootCmd.PersistentFlags().StringP("api-key", "k", "", "OpenAI API key (can also be set via OPENAI_API_KEY env var)")
 	rootCmd.PersistentFlags().BoolP("offline", "o", false, "Run in offline mode without API calls")
 }
+

@@ -164,3 +164,4 @@ func extractQueryPattern(queryContent string) string {
 
 	return strings.Join(queryLines, "\n")
 }
+
