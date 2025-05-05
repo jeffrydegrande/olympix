@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jeffrydegrande/solidair/pkg/concepts"
-	"github.com/jeffrydegrande/solidair/pkg/embedding"
-	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/jeffrydegrande/solidair/concepts"
+	"github.com/jeffrydegrande/solidair/embedding"
+	"github.com/jeffrydegrande/solidair/types"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 )
@@ -106,3 +106,4 @@ func generateEmbeddingsMain(cmd *cobra.Command, args []string) {
 	fmt.Printf("- Concepts: %s\n", filepath.Join(outputDir, "concepts.toml"))
 	fmt.Printf("- Embeddings: %s\n", filepath.Join(outputDir, "embeddings.toml"))
 }
+

@@ -4,7 +4,7 @@ import (
 	"context"
 	"sort"
 
-	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/jeffrydegrande/solidair/types"
 )
 
 // EmbeddingMatcher is a system for matching variables to security concepts
@@ -58,16 +58,16 @@ func (m *EmbeddingMatcher) getOfflineEmbedding(name string) types.Embedding {
 	// Create a simple embedding based on string characteristics
 	// This is just a placeholder that creates a vector with a few dimensions
 	vector := make([]float32, 3)
-	
+
 	// Fill with some values based on the string
 	for i := 0; i < len(vector); i++ {
 		if i < len(name) {
-			vector[i] = float32(name[i % len(name)]) / 255.0
+			vector[i] = float32(name[i%len(name)]) / 255.0
 		} else {
 			vector[i] = 0
 		}
 	}
-	
+
 	return types.Embedding{Vector: vector}
 }
 
@@ -144,3 +144,4 @@ func calculateStringSimilarity(varName, conceptName string, synonyms []string) f
 	// Simple n-gram similarity for fallback
 	return CalculateNGramSimilarity(varName, conceptName)
 }
+

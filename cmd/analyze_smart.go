@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/jeffrydegrande/solidair/cairo"
-	"github.com/jeffrydegrande/solidair/pkg/concepts"
-	"github.com/jeffrydegrande/solidair/pkg/embedding"
-	"github.com/jeffrydegrande/solidair/pkg/templates"
-	"github.com/jeffrydegrande/solidair/pkg/variables"
+	"github.com/jeffrydegrande/solidair/concepts"
+	"github.com/jeffrydegrande/solidair/embedding"
+	"github.com/jeffrydegrande/solidair/templates"
+	"github.com/jeffrydegrande/solidair/variables"
 	"github.com/spf13/cobra"
 )
 
@@ -167,3 +167,4 @@ func analyzeSmartMain(cmd *cobra.Command, args []string) {
 		}
 	}
 }
+

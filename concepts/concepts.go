@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/jeffrydegrande/solidair/types"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -93,3 +93,4 @@ func SaveConceptsFile(concepts []types.SecurityConcept, outputDir string) error 
 
 	return nil
 }
+

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/jeffrydegrande/solidair/cairo"
-	"github.com/jeffrydegrande/solidair/pkg/variables"
+	"github.com/jeffrydegrande/solidair/variables"
 	"github.com/spf13/cobra"
 )
 
@@ -48,3 +48,4 @@ func extractMain(cmd *cobra.Command, args []string) {
 	vars.Filename = filename
 	variables.PrintExtractedVariables(vars)
 }
+

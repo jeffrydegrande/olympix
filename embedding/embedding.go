@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/jeffrydegrande/solidair/types"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/sashabaranov/go-openai"
 )
@@ -163,3 +163,4 @@ func contains(s, substr string) bool {
 func CalculateNGramSimilarity(s1, s2 string) float32 {
 	return 0.5 // Placeholder
 }
+

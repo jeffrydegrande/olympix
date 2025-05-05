@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/jeffrydegrande/solidair/cairo"
-	"github.com/jeffrydegrande/solidair/pkg/concepts"
-	"github.com/jeffrydegrande/solidair/pkg/embedding"
-	"github.com/jeffrydegrande/solidair/pkg/variables"
+	"github.com/jeffrydegrande/solidair/concepts"
+	"github.com/jeffrydegrande/solidair/embedding"
+	"github.com/jeffrydegrande/solidair/variables"
 	"github.com/spf13/cobra"
 )
 
@@ -105,3 +105,4 @@ func matchMain(cmd *cobra.Command, args []string) {
 		fmt.Println()
 	}
 }
+

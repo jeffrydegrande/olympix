@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jeffrydegrande/solidair/pkg/types"
+	"github.com/jeffrydegrande/solidair/types"
 )
 
 // QueryTemplate represents a Tree-sitter query with template parameters
@@ -32,18 +32,18 @@ func ParseQueryTemplate(queryContent, source string) (*QueryTemplate, error) {
 		Source:     source,
 		Original:   queryContent,
 	}
-	
+
 	// Extract metadata from comments
 	nameRegex := regexp.MustCompile(`(?m)^;\s*Name:\s*(.+)$`)
 	if matches := nameRegex.FindStringSubmatch(queryContent); len(matches) > 1 {
 		template.Name = matches[1]
 	}
-	
+
 	descRegex := regexp.MustCompile(`(?m)^;\s*Description:\s*(.+)$`)
 	if matches := descRegex.FindStringSubmatch(queryContent); len(matches) > 1 {
 		template.Description = matches[1]
 	}
-	
+
 	// Extract concepts
 	conceptsRegex := regexp.MustCompile(`(?m)^;\s*Concepts:\s*(.+)$`)
 	if matches := conceptsRegex.FindStringSubmatch(queryContent); len(matches) > 1 {
@@ -54,18 +54,18 @@ func ParseQueryTemplate(queryContent, source string) (*QueryTemplate, error) {
 		}
 		template.Concepts = concepts
 	}
-	
+
 	// Extract template parameters
 	paramRegex := regexp.MustCompile(`\${([a-zA-Z_][a-zA-Z0-9_]*)}`)
 	matches := paramRegex.FindAllStringSubmatch(queryContent, -1)
-	
+
 	for _, match := range matches {
 		if len(match) >= 2 {
 			paramName := match[1]
 			template.Parameters[paramName] = struct{}{}
 		}
 	}
-	
+
 	return template, nil
 }
 
@@ -75,46 +75,46 @@ func SubstituteParameters(template *QueryTemplate, conceptMatches map[string][]t
 		Template:   template,
 		Parameters: make(map[string]string),
 	}
-	
+
 	processedQuery := template.Original
-	
+
 	// Check if we have matches for all required concepts
 	for _, concept := range template.Concepts {
 		matches, found := conceptMatches[concept]
 		if !found || len(matches) == 0 {
 			return nil, fmt.Errorf("no matches found for required concept: %s", concept)
 		}
-		
+
 		// Use the best match (highest similarity score)
 		bestMatch := matches[0]
 		paramName := concept
 		varName := bestMatch.Variable.Name
-		
+
 		// Store the parameter substitution
 		paramQuery.Parameters[paramName] = varName
-		
+
 		// Replace in the query string
 		placeholder := fmt.Sprintf("${%s}", paramName)
 		processedQuery = strings.ReplaceAll(processedQuery, placeholder, varName)
 	}
-	
+
 	// Store the processed query
 	paramQuery.ProcessedQuery = processedQuery
-	
+
 	return paramQuery, nil
 }
 
 // ProcessTemplatedQueries takes a set of query templates and processes them with matched variables
-func ProcessTemplatedQueries(queryTemplates map[string]*QueryTemplate, 
-                          conceptMatches map[string][]types.ConceptMatch) []*ParameterizedQuery {
+func ProcessTemplatedQueries(queryTemplates map[string]*QueryTemplate,
+	conceptMatches map[string][]types.ConceptMatch) []*ParameterizedQuery {
 	var processed []*ParameterizedQuery
-	
+
 	for _, template := range queryTemplates {
 		// Skip templates with no concepts
 		if len(template.Concepts) == 0 {
 			continue
 		}
-		
+
 		// Try to substitute parameters
 		paramQuery, err := SubstituteParameters(template, conceptMatches)
 		if err != nil {
@@ -122,9 +122,10 @@ func ProcessTemplatedQueries(queryTemplates map[string]*QueryTemplate,
 			fmt.Printf("Warning: Skipping template %s: %v\n", template.Name, err)
 			continue
 		}
-		
+
 		processed = append(processed, paramQuery)
 	}
-	
+
 	return processed
 }
+
