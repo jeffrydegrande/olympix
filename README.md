@@ -88,11 +88,11 @@ an indicator of active status:
 ```
 
 ```shell
-$ solidair examples/good.cairo
+$ solidair analyze examples/good.cairo
 Loaded 8 queries
 No vulnerabilities found.
 
-$ solidair examples/bad.cairo
+$ solidair analyze examples/bad.cairo
 Loaded 8 queries
 Found 8 potential vulnerabilities:
 
