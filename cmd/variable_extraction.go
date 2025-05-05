@@ -6,6 +6,9 @@ import (
 	"unsafe"
 
 	cairo "github.com/jeffrydegrande/solidair/cairo"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	tree_sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
@@ -17,7 +20,7 @@ func ExtractVariables(source []byte, tree *tree_sitter.Tree) (*ExtractedVariable
 
 	// Simple query to find all identifiers
 	query := "(identifier) @id"
-	
+
 	lang := tree_sitter.NewLanguage(unsafe.Pointer(cairo.Language()))
 	q, err := tree_sitter.NewQuery(lang, query)
 	if err != nil {
@@ -37,7 +40,7 @@ func ExtractVariables(source []byte, tree *tree_sitter.Tree) (*ExtractedVariable
 		for _, capture := range match.Captures {
 			node := capture.Node
 			text := string(source[node.StartByte():node.EndByte()])
-			
+
 			// Skip if we've already seen this variable
 			if seen[text] {
 				continue
@@ -50,7 +53,7 @@ func ExtractVariables(source []byte, tree *tree_sitter.Tree) (*ExtractedVariable
 				Context:    "variable", // Simplified context
 				LineNumber: uint32(node.StartPosition().Row) + 1,
 			}
-			
+
 			vars.Variables = append(vars.Variables, varInfo)
 		}
 	}
@@ -61,18 +64,20 @@ func ExtractVariables(source []byte, tree *tree_sitter.Tree) (*ExtractedVariable
 // PrintExtractedVariables prints information about extracted variables
 func PrintExtractedVariables(vars *ExtractedVariables) {
 	fmt.Printf("Extracted %d variables\n", len(vars.Variables))
-	
+
 	// Group variables by context
 	contextGroups := make(map[string][]VariableInfo)
 	for _, v := range vars.Variables {
 		contextGroups[v.Context] = append(contextGroups[v.Context], v)
 	}
-	
+
+	caser := cases.Title(language.English)
+
 	// Print each context group
 	for context, variables := range contextGroups {
-		fmt.Printf("\n%s Variables (%d):\n", strings.Title(context), len(variables))
+		fmt.Printf("\n%s Variables (%d):\n", caser.String(context), len(variables))
 		fmt.Println(strings.Repeat("-", 40))
-		
+
 		for _, v := range variables {
 			fmt.Printf("- %s", v.Name)
 			if v.Type != "" {
@@ -85,3 +90,4 @@ func PrintExtractedVariables(vars *ExtractedVariables) {
 		}
 	}
 }
+

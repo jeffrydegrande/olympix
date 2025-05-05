@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/sashabaranov/go-openai"
@@ -162,16 +161,16 @@ func (m *EmbeddingMatcher) getOfflineEmbedding(name string) Embedding {
 	// Create a simple embedding based on string characteristics
 	// This is just a placeholder that creates a vector with a few dimensions
 	vector := make([]float32, 3)
-	
+
 	// Fill with some values based on the string
 	for i := 0; i < len(vector); i++ {
 		if i < len(name) {
-			vector[i] = float32(name[i % len(name)]) / 255.0
+			vector[i] = float32(name[i%len(name)]) / 255.0
 		} else {
 			vector[i] = 0
 		}
 	}
-	
+
 	return Embedding{Vector: vector}
 }
 
@@ -232,13 +231,13 @@ func LoadSecurityConcepts() ([]SecurityConcept, error) {
 	embedDirs := []string{
 		"embeddings", // Current directory
 	}
-	
+
 	// Add executable directory if possible
 	if execPath, err := os.Executable(); err == nil {
 		execDir := filepath.Dir(execPath)
 		embedDirs = append(embedDirs, filepath.Join(execDir, "embeddings"))
 	}
-	
+
 	// Find the first existing embeddings directory
 	var embeddingsDir string
 	for _, dir := range embedDirs {
@@ -247,17 +246,17 @@ func LoadSecurityConcepts() ([]SecurityConcept, error) {
 			break
 		}
 	}
-	
+
 	if embeddingsDir == "" {
 		// Fallback to default concepts without embeddings
 		fmt.Println("Warning: No embeddings directory found. Using default concepts without embeddings.")
 		return DefaultSecurityConcepts(), nil
 	}
-	
+
 	// Try to load according to the new format (separate concepts and embeddings files)
 	conceptsFile := filepath.Join(embeddingsDir, "concepts.toml")
 	embeddingsFile := filepath.Join(embeddingsDir, "embeddings.toml")
-	
+
 	var conceptsExist, embeddingsExist bool
 	if _, err := os.Stat(conceptsFile); err == nil {
 		conceptsExist = true
@@ -265,7 +264,7 @@ func LoadSecurityConcepts() ([]SecurityConcept, error) {
 	if _, err := os.Stat(embeddingsFile); err == nil {
 		embeddingsExist = true
 	}
-	
+
 	// Check for legacy format if one of the new files is missing
 	if !conceptsExist || !embeddingsExist {
 		// Try legacy format with a single file
@@ -274,55 +273,55 @@ func LoadSecurityConcepts() ([]SecurityConcept, error) {
 			fmt.Println("Using legacy format security concepts file.")
 			return loadLegacySecurityConcepts(legacyFile)
 		}
-		
+
 		// Also try legacy format with concepts_metadata.toml
 		legacyMetadataFile := filepath.Join(embeddingsDir, "concepts_metadata.toml")
 		if _, err := os.Stat(legacyMetadataFile); err == nil {
 			fmt.Println("Using legacy format with concepts_metadata.toml.")
 			return loadLegacyMetadataFormat(embeddingsDir)
 		}
-		
+
 		// Fallback to default concepts without embeddings
 		fmt.Println("Warning: Missing concept or embedding files. Using default concepts without embeddings.")
 		return DefaultSecurityConcepts(), nil
 	}
-	
+
 	// Load concepts file
 	conceptsData, err := os.ReadFile(conceptsFile)
 	if err != nil {
 		return nil, fmt.Errorf("error reading concepts file: %w", err)
 	}
-	
+
 	var conceptsConfig struct {
 		Concepts []SecurityConcept `toml:"concepts"`
 	}
-	
+
 	if err := toml.Unmarshal(conceptsData, &conceptsConfig); err != nil {
 		return nil, fmt.Errorf("error parsing concepts file: %w", err)
 	}
-	
+
 	// Create a map for easier lookup
 	conceptsMap := make(map[string]*SecurityConcept)
 	for i := range conceptsConfig.Concepts {
 		conceptsMap[conceptsConfig.Concepts[i].Name] = &conceptsConfig.Concepts[i]
 	}
-	
+
 	// Load embeddings file
 	embeddingsData, err := os.ReadFile(embeddingsFile)
 	if err != nil {
 		fmt.Printf("Warning: Error reading embeddings file: %v. Using concepts without embeddings.\n", err)
 		return conceptsConfig.Concepts, nil
 	}
-	
+
 	var embeddingsConfig struct {
 		Embeddings []embeddingEntry `toml:"embeddings"`
 	}
-	
+
 	if err := toml.Unmarshal(embeddingsData, &embeddingsConfig); err != nil {
 		fmt.Printf("Warning: Error parsing embeddings file: %v. Using concepts without embeddings.\n", err)
 		return conceptsConfig.Concepts, nil
 	}
-	
+
 	// Merge embeddings into concepts
 	for _, entry := range embeddingsConfig.Embeddings {
 		if concept, exists := conceptsMap[entry.ConceptName]; exists {
@@ -331,7 +330,7 @@ func LoadSecurityConcepts() ([]SecurityConcept, error) {
 			fmt.Printf("Warning: Found embedding for unknown concept '%s'\n", entry.ConceptName)
 		}
 	}
-	
+
 	return conceptsConfig.Concepts, nil
 }
 
@@ -362,48 +361,48 @@ func loadLegacyMetadataFormat(embeddingsDir string) ([]SecurityConcept, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading concept metadata: %w", err)
 	}
-	
+
 	var config struct {
 		Concepts []SecurityConcept `toml:"concepts"`
 	}
-	
+
 	if err := toml.Unmarshal(metadataData, &config); err != nil {
 		return nil, fmt.Errorf("error parsing concept metadata: %w", err)
 	}
-	
+
 	// Now load each embedding file from the legacy format
 	embeddingsSubdir := filepath.Join(embeddingsDir, "embeddings")
 	if _, err := os.Stat(embeddingsSubdir); err == nil {
 		for i, concept := range config.Concepts {
 			embeddingFile := filepath.Join(embeddingsSubdir, fmt.Sprintf("%s.toml", concept.Name))
-			
+
 			// Skip if embedding file doesn't exist
 			if _, err := os.Stat(embeddingFile); os.IsNotExist(err) {
 				fmt.Printf("Warning: No embedding file found for concept '%s'\n", concept.Name)
 				continue
 			}
-			
+
 			// Read the embedding file
 			embeddingData, err := os.ReadFile(embeddingFile)
 			if err != nil {
 				fmt.Printf("Warning: Error reading embedding for '%s': %v\n", concept.Name, err)
 				continue
 			}
-			
+
 			var embeddingConfig struct {
 				Embedding Embedding `toml:"embedding"`
 			}
-			
+
 			if err := toml.Unmarshal(embeddingData, &embeddingConfig); err != nil {
 				fmt.Printf("Warning: Error parsing embedding for '%s': %v\n", concept.Name, err)
 				continue
 			}
-			
+
 			// Add the embedding to the concept
 			config.Concepts[i].Embedding = embeddingConfig.Embedding
 		}
 	}
-	
+
 	return config.Concepts, nil
 }
 
@@ -456,46 +455,4 @@ func GetAPIKey() string {
 	// Then try config file (implementation would depend on your config system)
 	// This is just a placeholder
 	return ""
-}
-
-// calculateStringSimilarity computes a simple similarity score for offline mode
-func calculateStringSimilarity(varName, conceptName string, synonyms []string) float32 {
-	// Check for exact match
-	if varName == conceptName {
-		return 1.0
-	}
-
-	// Check if variable name contains concept name
-	if contains(varName, conceptName) {
-		return 0.9
-	}
-
-	// Check synonyms
-	for _, synonym := range synonyms {
-		if contains(varName, synonym) {
-			return 0.8
-		}
-	}
-
-	// Simple n-gram similarity for fallback
-	return calculateNGramSimilarity(varName, conceptName)
-}
-
-// contains checks if a string contains another string, case-insensitive
-func contains(s, substr string) bool {
-	return containsIgnoreCase(s, substr)
-}
-
-// containsIgnoreCase checks if a string contains another string, case-insensitive
-// This is a simple placeholder implementation
-func containsIgnoreCase(s, substr string) bool {
-	// A more sophisticated implementation would handle case insensitivity
-	// and word boundaries properly
-	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
-}
-
-// calculateNGramSimilarity computes n-gram similarity between two strings
-// This is a placeholder implementation
-func calculateNGramSimilarity(s1, s2 string) float32 {
-	return 0.5 // Placeholder
 }
